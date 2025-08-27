@@ -24,7 +24,7 @@ def generate_signal(price):
     elif price < sma10:
         return f"📉 SELL (Price {price:.2f} < SMA10 {sma10:.2f})"
     else:
-        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA10 {sma20:.2f})"
+        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA10 {sma10:.2f})"
 
 def build_message():
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
