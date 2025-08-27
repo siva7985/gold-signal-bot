@@ -1,7 +1,7 @@
 name: send-gold-signal
 on:
   schedule:
-    - cron: "*/30 * * * *"   # runs every 30 minutes (UTC)
+    - cron: "*/5 * * * *"   # runs every 5 minutes (UTC)
   workflow_dispatch:         # allows manual run
 
 jobs:
