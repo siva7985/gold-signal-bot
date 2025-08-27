@@ -30,10 +30,27 @@ def build_message():
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     price = get_gold_price()
     if price is None:
-        return f"🟡 GOLD SIGNAL\nTime: {now_utc}\n⚠️ Could not fetch price."
+        return f"🟡 GOLD SIGNAL\n⏰ {now_utc}\n⚠️ Could not fetch price."
+    
     signal = generate_signal(price)
-    return f"🟡 GOLD SIGNAL\nTime: {now_utc}\nPrice: {price:.2f}\nSignal: {signal}"
 
+    # Example TP/SL levels (static, just for formatting demo)
+    tp_level = round(price + 5, 2)   # take profit = +5
+    sl_level = round(price - 5, 2)   # stop loss = -5
+
+    return (
+        "━━━━━━━━━━━━━━━━━━━\n"
+        "📊 GOLD TRADING SIGNAL\n"
+        f"⏰ Time: {now_utc}\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
+        f"💰 Price: {price:.2f}\n"
+        f"📌 Signal: {signal}\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
+        f"🎯 TP: {tp_level}\n"
+        f"🛑 SL: {sl_level}\n"
+        "━━━━━━━━━━━━━━━━━━━"
+    )
+    
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
