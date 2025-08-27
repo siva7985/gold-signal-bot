@@ -51,11 +51,24 @@ def build_message():
         "━━━━━━━━━━━━━━━━━━━"
     )
     
+import time
+
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
-    r = requests.post(url, json=payload, timeout=15)
-    r.raise_for_status()
+
+    for attempt in range(3):  # try up to 3 times
+        try:
+            r = requests.post(url, json=payload, timeout=30)
+            r.raise_for_status()
+            print("✅ Telegram message sent successfully")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Telegram send failed (attempt {attempt+1}): {e}")
+            time.sleep(5)  # wait 5s before retry
+    
+    raise Exception("❌ Failed to send Telegram message after 3 attempts")
+
 
 if __name__ == "__main__":
     msg = build_message()
