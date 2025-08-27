@@ -17,7 +17,7 @@ def generate_signal(price):
     data = ticker.history(period="1d", interval="5m")
     if len(data) < 10:
         return "No Signal"
-    sma20 = data["Close"].tail(10).mean()
+    sma10 = data["Close"].tail(10).mean()
     
     if price > sma10:
         return f"📈 BUY (Price {price:.2f} > SMA10 {sma10:.2f})"
