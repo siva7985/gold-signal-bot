@@ -4,7 +4,7 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_gold_price():
-    ticker = yf.Ticker("XAUUSD=X")   # Yahoo Finance symbol for Gold/USD
+    ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
     data = ticker.history(period="1d", interval="30m")
     if data.empty:
         return None
@@ -13,7 +13,7 @@ def get_gold_price():
 
 def generate_signal(price):
     # Simple logic (example): compare current price with 20-period average
-    ticker = yf.Ticker("XAUUSD=X")
+    ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
     data = ticker.history(period="5d", interval="30m")
     if len(data) < 20:
         return "No Signal"
