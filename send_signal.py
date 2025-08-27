@@ -14,17 +14,17 @@ def get_gold_price():
 def generate_signal(price):
     # Simple logic (example): compare current price with 20-period average
     ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
-    data = ticker.history(period="5d", interval="30m")
-    if len(data) < 20:
+    data = ticker.history(period="1d", interval="5m")
+    if len(data) < 10:
         return "No Signal"
     sma20 = data["Close"].tail(20).mean()
     
-    if price > sma20:
-        return f"📈 BUY (Price {price:.2f} > SMA20 {sma20:.2f})"
-    elif price < sma20:
-        return f"📉 SELL (Price {price:.2f} < SMA20 {sma20:.2f})"
+    if price > sma10:
+        return f"📈 BUY (Price {price:.2f} > SMA10 {sma10:.2f})"
+    elif price < sma10:
+        return f"📉 SELL (Price {price:.2f} < SMA10 {sma10:.2f})"
     else:
-        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA20 {sma20:.2f})"
+        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA10 {sma20:.2f})"
 
 def build_message():
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
@@ -35,8 +35,8 @@ def build_message():
     signal = generate_signal(price)
 
     # Example TP/SL levels (static, just for formatting demo)
-    tp_level = round(price + 5, 2)   # take profit = +5
-    sl_level = round(price - 5, 2)   # stop loss = -5
+    tp_level = round(price + 10, 2)   # take profit = +10
+    sl_level = round(price - 10, 2)   # stop loss = -10
 
     return (
         "━━━━━━━━━━━━━━━━━━━\n"
@@ -44,7 +44,7 @@ def build_message():
         f"⏰ Time: {now_utc}\n"
         "━━━━━━━━━━━━━━━━━━━\n"
         f"💰 Price: {price:.2f}\n"
-        f"📌 Signal: {signal}\n"
+        #f"📌 Signal: {signal}\n"
         "━━━━━━━━━━━━━━━━━━━\n"
         f"🎯 TP: {tp_level}\n"
         f"🛑 SL: {sl_level}\n"
