@@ -3,28 +3,18 @@ import os, requests, datetime, yfinance as yf, time
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
-API_KEY = os.getenv("ALPHA_VANTAGE_KEY")
+TD_API_KEY = os.getenv("TWELVE_DATA_KEY")
 
 def get_gold_price():
-    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=XAUUSD&interval=5min&apikey={API_KEY}"
+    url = f"https://api.twelvedata.com/price?symbol=XAU/USD&apikey={TD_API_KEY}"
     try:
         r = requests.get(url, timeout=10)
         r.raise_for_status()
         data = r.json()
-        print("DEBUG RAW RESPONSE:", list(data.keys()))  # check structure
-
-        # Intraday prices are under "Time Series (5min)"
-        ts = data.get("Time Series (5min)")
-        if not ts:
-            return None
-
-        # Take the latest candle
-        latest_time = sorted(ts.keys())[-1]
-        last_close = float(ts[latest_time]["4. close"])
-        return last_close
+        print("DEBUG:", data)
+        return float(data["price"])
     except Exception as e:
         print("⚠️ Error fetching price:", e)
-        print("DEBUG:", data if 'data' in locals() else "No response")
         return None
 
 def generate_signal(price, symbol="XAUUSD=X"):
