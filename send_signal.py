@@ -6,14 +6,22 @@ CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 API_KEY = os.getenv("ALPHA_VANTAGE_KEY")
 
 def get_gold_price():
-    url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=XAU&to_currency=USD&apikey={API_KEY}"
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=XAUUSD&interval=5min&apikey={API_KEY}"
     try:
         r = requests.get(url, timeout=10)
         r.raise_for_status()
         data = r.json()
-        print("DEBUG RAW RESPONSE:", data)
-        price = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
-        return price
+        print("DEBUG RAW RESPONSE:", list(data.keys()))  # check structure
+
+        # Intraday prices are under "Time Series (5min)"
+        ts = data.get("Time Series (5min)")
+        if not ts:
+            return None
+
+        # Take the latest candle
+        latest_time = sorted(ts.keys())[-1]
+        last_close = float(ts[latest_time]["4. close"])
+        return last_close
     except Exception as e:
         print("⚠️ Error fetching price:", e)
         print("DEBUG:", data if 'data' in locals() else "No response")
