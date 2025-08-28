@@ -4,14 +4,13 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_gold_price():
-    for symbol in ["XAUUSD=X", "XAU=X", "GC=F"]:  # Try spot first, then futures
-        ticker = yf.Ticker(symbol)
-        data = ticker.history(period="1d", interval="5m")
-        if not data.empty:
-            last = data.iloc[-1]
-            print(f"DEBUG: Using {symbol}, price={last['Close']}")
-            return float(last["Close"])
-    return None
+    ticker = yf.Ticker("XAUUSD=X")   # force spot
+    data = ticker.history(period="1d", interval="5m")
+    if data.empty:
+        print("⚠️ Spot gold not available from Yahoo")
+        return None
+    last = data.iloc[-1]
+    return float(last["Close"])
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
