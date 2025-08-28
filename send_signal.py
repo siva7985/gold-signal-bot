@@ -35,8 +35,8 @@ def build_message():
     signal = generate_signal(price)
 
     # Example TP/SL levels (static, just for formatting demo)
-    tp_level = round(price + 10, 2)   # take profit = +10
-    sl_level = round(price - 10, 2)   # stop loss = -10
+    tp_level = round(price + 5, 2)   # take profit = +5
+    sl_level = round(price - 5, 2)   # stop loss = -5
 
     return (
         "━━━━━━━━━━━━━━━━━━━\n"
