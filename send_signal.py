@@ -5,7 +5,7 @@ CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_gold_price():
     ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
-    data = ticker.history(period="1d", interval="30m")
+    data = ticker.history(period="1d", interval="5m")
     if data.empty:
         return None
     last = data.iloc[-1]
@@ -15,16 +15,16 @@ def generate_signal(price):
     # Simple logic (example): compare current price with 20-period average
     ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
     data = ticker.history(period="1d", interval="5m")
-    if len(data) < 10:
+    if len(data) < 5:
         return "No Signal"
-    sma10 = data["Close"].tail(10).mean()
+    sma5 = data["Close"].tail(5).mean()
     
-    if price > sma10:
-        return f"📈 BUY (Price {price:.2f} > SMA10 {sma10:.2f})"
-    elif price < sma10:
-        return f"📉 SELL (Price {price:.2f} < SMA10 {sma10:.2f})"
+    if price > sma5:
+        return f"📈 BUY (Price {price:.2f} > SMA5 {sma5:.2f})"
+    elif price < sma5:
+        return f"📉 SELL (Price {price:.2f} < SMA5 {sma5:.2f})"
     else:
-        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA10 {sma10:.2f})"
+        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA5 {sma5:.2f})"
 
 def build_message():
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
