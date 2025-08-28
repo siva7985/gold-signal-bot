@@ -12,19 +12,20 @@ def get_gold_price():
     return float(last["Close"])
 
 def generate_signal(price):
-    # Simple logic (example): compare current price with 20-period average
-    ticker = yf.Ticker("GC=F")       # Gold Futures (more reliable)
+    ticker = yf.Ticker("GC=F")
     data = ticker.history(period="1d", interval="5m")
-    if len(data) < 5:
+    if len(data) < 2:
         return "No Signal"
-    sma5 = data["Close"].tail(5).mean()
-    
-    if price > sma5:
-        return f"📈 BUY (Price {price:.2f} > SMA5 {sma5:.2f})"
-    elif price < sma5:
-        return f"📉 SELL (Price {price:.2f} < SMA5 {sma5:.2f})"
+
+    last_close = data["Close"].iloc[-1]
+    prev_close = data["Close"].iloc[-2]
+
+    if last_close > prev_close:
+        return f"📈 BUY (Last {last_close:.2f} > Prev {prev_close:.2f})"
+    elif last_close < prev_close:
+        return f"📉 SELL (Last {last_close:.2f} < Prev {prev_close:.2f})"
     else:
-        return f"⚖️ HOLD (Price {price:.2f} ≈ SMA5 {sma5:.2f})"
+        return f"⚖️ HOLD (Last {last_close:.2f} ≈ Prev {prev_close:.2f})"
 
 def build_message():
     now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
