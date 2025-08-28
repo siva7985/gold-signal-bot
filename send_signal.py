@@ -11,6 +11,7 @@ def get_gold_price():
         r = requests.get(url, timeout=10)
         r.raise_for_status()
         data = r.json()
+        print("DEBUG RAW RESPONSE:", data)
         price = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
         return price
     except Exception as e:
