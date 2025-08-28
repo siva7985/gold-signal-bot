@@ -3,14 +3,20 @@ import os, requests, datetime, yfinance as yf, time
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
+API_KEY = os.getenv("ALPHA_VANTAGE_KEY")
+
 def get_gold_price():
-    ticker = yf.Ticker("XAUUSD=X")   # force spot
-    data = ticker.history(period="1d", interval="5m")
-    if data.empty:
-        print("⚠️ Spot gold not available from Yahoo")
+    url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=XAU&to_currency=USD&apikey={API_KEY}"
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        price = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+        return price
+    except Exception as e:
+        print("⚠️ Error fetching price:", e)
+        print("DEBUG:", data if 'data' in locals() else "No response")
         return None
-    last = data.iloc[-1]
-    return float(last["Close"])
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
