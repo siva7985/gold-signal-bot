@@ -4,7 +4,7 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_gold_price():
-    ticker = yf.Ticker("XAUUSD=X")
+    ticker = yf.Ticker("XAU=X")
     data = ticker.history(period="1d", interval="5m")
     if data.empty:
         return None
@@ -12,7 +12,7 @@ def get_gold_price():
     return float(last["Close"])
 
 def generate_signal(price):
-    ticker = yf.Ticker("XAUUSD=X")
+    ticker = yf.Ticker("XAU=X")
     data = ticker.history(period="1d", interval="5m")
     if len(data) < 5:
         return "No Signal"
