@@ -10,7 +10,7 @@ def get_gold_price():
         print("⚠️ No Finnhub API key found. Did you set FINNHUB_KEY in GitHub Secrets?")
         return None
 
-    url = f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FH_KEY}"
+    url = f"https://finnhub.io/api/v1/quote?symbol=XAUUSD&token={FH_KEY}"
     try:
         r = requests.get(url, timeout=10)
         r.raise_for_status()
