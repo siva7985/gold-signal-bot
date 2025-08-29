@@ -6,15 +6,25 @@ CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 FH_KEY = os.getenv("FINNHUB_KEY")
 
 def get_gold_price():
-    url = f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FH_KEY}"
-    r = requests.get(url, timeout=10)
-    data = r.json()
-    print("DEBUG:", data)
-
-    if "c" not in data:  # if error, avoid crash
+    if not FH_KEY:
+        print("⚠️ No Finnhub API key found. Did you set FINNHUB_KEY in GitHub Secrets?")
         return None
 
-    return float(data["c"])   # current price
+    url = f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FH_KEY}"
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        print("DEBUG RESPONSE:", data)
+
+        if "c" not in data or data["c"] == 0:
+            print("⚠️ Invalid price received")
+            return None
+
+        return float(data["c"])  # current price
+    except Exception as e:
+        print("⚠️ Error fetching price:", e)
+        return None
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
