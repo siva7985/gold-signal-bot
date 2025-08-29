@@ -3,14 +3,14 @@ import os, requests, datetime, yfinance as yf, time
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
+API_KEY = os.getenv("METALPRICE_KEY")
+
 def get_gold_price():
-    ticker = yf.Ticker("XAUUSD=X")
-    data = ticker.history(period="1d", interval="5m")
-    if data.empty:
-        print("⚠️ No data returned from Yahoo")
-        return None
-    last = data.iloc[-1]
-    return float(last["Close"])
+    url = f"https://api.metalpriceapi.com/v1/latest?api_key={API_KEY}&base=XAU&currencies=USD"
+    r = requests.get(url, timeout=10)
+    data = r.json()
+    print("DEBUG:", data)
+    return float(data["rates"]["USD"])
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
