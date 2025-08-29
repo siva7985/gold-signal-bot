@@ -6,11 +6,27 @@ CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 API_KEY = os.getenv("METALPRICE_KEY")
 
 def get_gold_price():
-    url = f"https://api.metalpriceapi.com/v1/latest?api_key={API_KEY}&base=XAU&currencies=USD"
-    r = requests.get(url, timeout=10)
-    data = r.json()
-    print("DEBUG:", data)
-    return float(data["rates"]["USD"])
+    try:
+        url = f"https://api.metalpriceapi.com/v1/latest?api_key={API_KEY}&base=XAU&currencies=USD"
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        print("DEBUG:", data)  # keep for logging
+
+        if not data.get("success"):
+            print("⚠️ Metalprice API failed")
+            return None
+
+        price = data["rates"].get("USD")
+        if not price or price <= 0:
+            print("⚠️ Invalid price from Metalprice API")
+            return None
+
+        return float(price)
+
+    except Exception as e:
+        print("⚠️ Error fetching price:", e)
+        return None
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
