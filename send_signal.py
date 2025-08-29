@@ -10,6 +10,10 @@ def get_gold_price():
     r = requests.get(url, timeout=10)
     data = r.json()
     print("DEBUG:", data)
+
+    if "c" not in data:  # if error, avoid crash
+        return None
+
     return float(data["c"])   # current price
 
 def generate_signal(price, symbol="XAUUSD=X"):
