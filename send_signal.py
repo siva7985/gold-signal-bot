@@ -3,14 +3,14 @@ import os, requests, datetime, yfinance as yf, time
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
-API_KEY = os.getenv("METALPRICE_KEY")
+FH_KEY = os.getenv("FINNHUB_KEY")
 
 def get_gold_price():
-    url = f"https://api.metalpriceapi.com/v1/latest?api_key={API_KEY}&base=XAU&currencies=USD"
+    url = f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FH_KEY}"
     r = requests.get(url, timeout=10)
     data = r.json()
     print("DEBUG:", data)
-    return float(data["rates"]["USD"])
+    return float(data["c"])   # current price
 
 def generate_signal(price, symbol="XAUUSD=X"):
     ticker = yf.Ticker(symbol)
