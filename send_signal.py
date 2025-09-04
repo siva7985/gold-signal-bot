@@ -1,37 +1,30 @@
-import os, requests, datetime, time
+import os, requests, datetime, yfinance as yf, time 
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
-API_KEY   = os.getenv("METALPRICE_KEY")   # Metalprice API key
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") 
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # ================== FETCH GOLD PRICE ==================
 def get_gold_price():
-    try:
-        url = f"https://api.metalpriceapi.com/v1/latest?api_key={API_KEY}&base=XAU&currencies=USD"
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        print("DEBUG:", data)  # log raw response
-
-        if not data.get("success"):
-            print("⚠️ Metalprice API failed")
-            return None
-
-        price = data["rates"].get("USD")
-        if not price or price <= 0:
-            print("⚠️ Invalid price from Metalprice API")
-            return None
-
-        return float(price)
-
-    except Exception as e:
-        print("⚠️ Error fetching price:", e)
-        return None
+    for symbol in ["XAUUSD=X", "XAU=X", "GC=F"]:  # Try spot first, then futures
+        ticker = yf.Ticker(symbol)
+        data = ticker.history(period="1d", interval="5m")
+        if not data.empty:
+            last = data.iloc[-1]
+            print(f"DEBUG: Using {symbol}, price={last['Close']}")
+            return float(last["Close"])
+    return None
 
 # ================== TRADING SIGNAL ==================
 def generate_signal(price):
-    # Simple logic: Compare current price to 5-period SMA (mocked with ±1%)
-    sma5 = price * 1.001  # pretend SMA5 is 0.1% higher for demo
+    ticker = yf.Ticker("GC=F")
+    data = ticker.history(period="1d", interval="5m")
+    if len(data) < 5:
+        return "No Signal"
+
+    # Hybrid logic: SMA5 + last close
+    sma5 = data["Close"].tail(5).mean()
+    last_close = data["Close"].iloc[-1]
+    
     if price > sma5:
         return f"📈 BUY (Price {price:.2f} > SMA5 {sma5:.2f})"
     elif price < sma5:
