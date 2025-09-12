@@ -5,23 +5,26 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # ================== FETCH GOLD PRICE ==================
 def get_gold_price():
-    for symbol in ["XAUUSD=X", "XAU=X", "GC=F"]:  # Try spot first, then futures
-        ticker = yf.Ticker(symbol)
-        data = ticker.history(period="1d", interval="5m")
-        if not data.empty:
-            last = data.iloc[-1]
-            print(f"DEBUG: Using {symbol}, price={last['Close']}")
-            return float(last["Close"])
+    symbols = ["GC=F", "XAUUSD=X", "XAU=X"]  # GC=F is most reliable
+    for symbol in symbols:
+        try:
+            ticker = yf.Ticker(symbol)
+            data = ticker.history(period="1d", interval="5m")
+            if not data.empty:
+                last = data.iloc[-1]
+                print(f"DEBUG: Using {symbol}, price={last['Close']}")
+                return float(last["Close"])
+        except Exception as e:
+            print(f"⚠️ Failed {symbol}: {e}")
     return None
 
 # ================== TRADING SIGNAL ==================
 def generate_signal(price):
     ticker = yf.Ticker("GC=F")
     data = ticker.history(period="1d", interval="5m")
-    if len(data) < 5:
+    if data.empty or len(data) < 5:
         return "No Signal"
 
-    # Hybrid logic: SMA5 + last close
     sma5 = data["Close"].tail(5).mean()
     last_close = data["Close"].iloc[-1]
     
@@ -41,7 +44,6 @@ def build_message():
 
     signal = generate_signal(price)
 
-    # Dynamic TP/SL ±0.1% of current price
     tp_level = round(price * 1.001, 2)
     sl_level = round(price * 0.999, 2)
 
@@ -59,21 +61,21 @@ def build_message():
     )
 
 # ================== SEND TO TELEGRAM ==================
-def send_telegram(text):
+def send_telegram(text, retries=3):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
 
-    for attempt in range(3):
+    for attempt in range(1, retries + 1):
         try:
-            r = requests.post(url, json=payload, timeout=30)
+            r = requests.post(url, json=payload, timeout=10)  # shorter timeout
             r.raise_for_status()
             print("✅ Telegram message sent successfully")
             return True
         except requests.exceptions.RequestException as e:
-            print(f"⚠️ Telegram send failed (attempt {attempt+1}): {e}")
-            time.sleep(5)
+            print(f"⚠️ Telegram send failed (attempt {attempt}): {e}")
+            time.sleep(attempt * 5)  # exponential backoff
 
-    raise Exception("❌ Failed to send Telegram message after 3 attempts")
+    raise Exception("❌ Failed to send Telegram message after retries")
 
 # ================== MAIN ==================
 if __name__ == "__main__":
